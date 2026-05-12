@@ -105,7 +105,9 @@ public class InstrumentationModuleClassLoader extends ClassLoader {
         new StringMatcher("io.opentelemetry.javaagent", StringMatcher.Mode.STARTS_WITH),
         commonCl,
         new StringMatcher(
-                "io.opentelemetry.javaagent.instrumentation.hibernate.common", StringMatcher.Mode.CONTAINS));
+                "io.opentelemetry.javaagent.instrumentation.", StringMatcher.Mode.CONTAINS)
+            .and(new StringMatcher(".common.", StringMatcher.Mode.CONTAINS))
+    );
   }
 
   InstrumentationModuleClassLoader(
