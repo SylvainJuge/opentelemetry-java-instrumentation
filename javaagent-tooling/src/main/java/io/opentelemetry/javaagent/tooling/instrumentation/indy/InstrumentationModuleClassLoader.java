@@ -106,8 +106,7 @@ public class InstrumentationModuleClassLoader extends ClassLoader {
         commonCl,
         new StringMatcher(
                 "io.opentelemetry.javaagent.instrumentation.", StringMatcher.Mode.CONTAINS)
-            .and(new StringMatcher(".common.", StringMatcher.Mode.CONTAINS))
-    );
+            .and(new StringMatcher(".common.", StringMatcher.Mode.CONTAINS)));
   }
 
   InstrumentationModuleClassLoader(
@@ -253,7 +252,7 @@ public class InstrumentationModuleClassLoader extends ClassLoader {
       Class<?> result = findLoadedClass(name);
 
       // Common classes delegation is first to ensure they are only loaded in the common CL
-      if(commonCl != null && agentCommonClassNamesMatcher.matches(name)){
+      if (commonCl != null && agentCommonClassNamesMatcher.matches(name)) {
         result = tryLoad(commonCl, name);
       }
 
