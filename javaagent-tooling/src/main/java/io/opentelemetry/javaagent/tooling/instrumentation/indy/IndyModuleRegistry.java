@@ -34,6 +34,9 @@ public class IndyModuleRegistry {
   private static final ClassLoaderValue<Map<String, InstrumentationModuleClassLoader>>
       instrumentationClassLoaders = new ClassLoaderValue<>();
 
+  private static final ClassLoaderValue<InstrumentationModuleClassLoader>
+      instrumentationCommonClassLoader = new ClassLoaderValue<>();
+
   public static InstrumentationModuleClassLoader getInstrumentationClassLoader(
       String moduleClassName, ClassLoader instrumentedClassLoader) {
     InstrumentationModule instrumentationModule = modulesByClassName.get(moduleClassName);
@@ -100,7 +103,7 @@ public class IndyModuleRegistry {
     // TODO: remove this method and replace usages with a custom TypePool implementation instead
     ClassLoader agentOrExtensionCl = module.getClass().getClassLoader();
     InstrumentationModuleClassLoader cl =
-        new InstrumentationModuleClassLoader(instrumentedClassLoader, agentOrExtensionCl);
+        new InstrumentationModuleClassLoader(instrumentedClassLoader, agentOrExtensionCl, null);
     cl.installModule(module, true);
     return cl;
   }
@@ -125,6 +128,11 @@ public class IndyModuleRegistry {
 
     ClassLoader agentOrExtensionCl = module.getClass().getClassLoader();
 
+    InstrumentationModuleClassLoader commonCl =
+        instrumentationCommonClassLoader.computeIfAbsent(
+            classLoader,
+            () -> new InstrumentationModuleClassLoader(classLoader, agentOrExtensionCl, null));
+
     String groupName = getModuleGroup(module);
 
     InstrumentationModuleClassLoader moduleCl =
@@ -132,7 +140,9 @@ public class IndyModuleRegistry {
             .computeIfAbsent(classLoader, ConcurrentHashMap::new)
             .computeIfAbsent(
                 groupName,
-                unused -> new InstrumentationModuleClassLoader(classLoader, agentOrExtensionCl));
+                unused ->
+                    new InstrumentationModuleClassLoader(
+                        classLoader, agentOrExtensionCl, commonCl));
 
     moduleCl.installModule(module);
   }

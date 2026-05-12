@@ -74,6 +74,7 @@ public class InstrumentationModuleClassLoader extends ClassLoader {
 
   private final Map<String, BytecodeWithUrl> additionalInjectedClasses;
   private final ClassLoader agentOrExtensionCl;
+  @Nullable private final ClassLoader commonCl;
   private volatile MethodHandles.Lookup cachedLookup;
 
   @Nullable private final ClassLoader instrumentedCl;
@@ -85,6 +86,8 @@ public class InstrumentationModuleClassLoader extends ClassLoader {
    */
   private final ElementMatcher<String> agentClassNamesMatcher;
 
+  private final ElementMatcher<String> agentCommonClassNamesMatcher;
+
   /**
    * Mutable set of packages from the agent classloader to hide. So even if a class matches {@link
    * #agentClassNamesMatcher}, it will not be attempted to be loaded from the agent classloader if
@@ -95,17 +98,22 @@ public class InstrumentationModuleClassLoader extends ClassLoader {
   private final Set<InstrumentationModule> installedModules;
 
   public InstrumentationModuleClassLoader(
-      ClassLoader instrumentedCl, ClassLoader agentOrExtensionCl) {
+      ClassLoader instrumentedCl, ClassLoader agentOrExtensionCl, @Nullable ClassLoader commonCl) {
     this(
         instrumentedCl,
         agentOrExtensionCl,
-        new StringMatcher("io.opentelemetry.javaagent", StringMatcher.Mode.STARTS_WITH));
+        new StringMatcher("io.opentelemetry.javaagent", StringMatcher.Mode.STARTS_WITH),
+        commonCl,
+        new StringMatcher(
+                "io.opentelemetry.javaagent.instrumentation.hibernate.common", StringMatcher.Mode.CONTAINS));
   }
 
   InstrumentationModuleClassLoader(
       @Nullable ClassLoader instrumentedCl,
       ClassLoader agentOrExtensionCl,
-      ElementMatcher<String> classesToLoadFromAgentOrExtensionCl) {
+      ElementMatcher<String> classesToLoadFromAgentOrExtensionCl,
+      @Nullable ClassLoader commonCl,
+      ElementMatcher<String> classesToLoadFromCommonCl) {
     // agent/extension-class loader is "main"-parent, but class lookup is overridden
     super(agentOrExtensionCl);
     additionalInjectedClasses = new ConcurrentHashMap<>();
@@ -114,6 +122,8 @@ public class InstrumentationModuleClassLoader extends ClassLoader {
     this.instrumentedCl = instrumentedCl;
     this.agentClassNamesMatcher = classesToLoadFromAgentOrExtensionCl;
     this.hiddenAgentPackages = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    this.commonCl = commonCl;
+    this.agentCommonClassNamesMatcher = classesToLoadFromCommonCl;
   }
 
   /**
@@ -240,7 +250,12 @@ public class InstrumentationModuleClassLoader extends ClassLoader {
     synchronized (getClassLoadingLock(name)) {
       Class<?> result = findLoadedClass(name);
 
-      // This CL is self-first: Injected class are loaded BEFORE a parent lookup
+      // Common classes delegation is first to ensure they are only loaded in the common CL
+      if(commonCl != null && agentCommonClassNamesMatcher.matches(name)){
+        result = tryLoad(commonCl, name);
+      }
+
+      // Injected class are loaded BEFORE a parent lookup
       if (result == null) {
         BytecodeWithUrl injected = getInjectedClass(name);
         if (injected != null) {

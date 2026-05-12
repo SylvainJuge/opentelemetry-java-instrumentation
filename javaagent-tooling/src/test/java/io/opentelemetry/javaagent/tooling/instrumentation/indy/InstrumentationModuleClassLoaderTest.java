@@ -66,11 +66,11 @@ class InstrumentationModuleClassLoaderTest {
     ClassLoader dummyParent = new URLClassLoader(new URL[] {}, null);
 
     InstrumentationModuleClassLoader m1 =
-        new InstrumentationModuleClassLoader(dummyParent, dummyParent, any());
+        new InstrumentationModuleClassLoader(dummyParent, dummyParent, any(), null, any());
     m1.installInjectedClasses(toInject);
 
     InstrumentationModuleClassLoader m2 =
-        new InstrumentationModuleClassLoader(dummyParent, dummyParent, any());
+        new InstrumentationModuleClassLoader(dummyParent, dummyParent, any(), null, any());
     m2.installInjectedClasses(toInject);
 
     // MethodHandles.publicLookup() always succeeds on the first invocation
@@ -105,7 +105,7 @@ class InstrumentationModuleClassLoaderTest {
 
     ClassLoader dummyParent = new URLClassLoader(new URL[] {}, null);
     InstrumentationModuleClassLoader m1 =
-        new InstrumentationModuleClassLoader(dummyParent, dummyParent, any());
+        new InstrumentationModuleClassLoader(dummyParent, dummyParent, any(), null, any());
     m1.installInjectedClasses(toInject);
 
     Class<?> injected = Class.forName(A.class.getName(), true, m1);
@@ -147,7 +147,7 @@ class InstrumentationModuleClassLoaderTest {
       toInject.put(C.class.getName(), BytecodeWithUrl.create(C.class.getName(), moduleSourceCl));
 
       InstrumentationModuleClassLoader moduleCl =
-          new InstrumentationModuleClassLoader(appCl, agentCl, any());
+          new InstrumentationModuleClassLoader(appCl, agentCl, any(), null, any());
       moduleCl.installInjectedClasses(toInject);
 
       // Verify precedence for classloading
@@ -247,14 +247,14 @@ class InstrumentationModuleClassLoaderTest {
     ClassLoader agentCl = HideMe.class.getClassLoader();
 
     InstrumentationModuleClassLoader nothingHidden =
-        new InstrumentationModuleClassLoader(null, agentCl, any());
+        new InstrumentationModuleClassLoader(null, agentCl, any(), null, any());
     nothingHidden.installModule(module);
 
     assertThat(nothingHidden.loadClass(HideMe.class.getName())).isSameAs(HideMe.class);
 
     module.hiddenPackages.add(HideMe.class.getPackage().getName());
     InstrumentationModuleClassLoader classHidden =
-        new InstrumentationModuleClassLoader(null, agentCl, any());
+        new InstrumentationModuleClassLoader(null, agentCl, any(), null, any());
     classHidden.installModule(module);
 
     assertThatThrownBy(() -> classHidden.loadClass(HideMe.class.getName()))
