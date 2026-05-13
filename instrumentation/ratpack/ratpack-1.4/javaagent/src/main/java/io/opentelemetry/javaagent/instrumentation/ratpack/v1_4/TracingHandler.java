@@ -10,8 +10,8 @@ import static io.opentelemetry.javaagent.instrumentation.ratpack.v1_4.RatpackSin
 import static io.opentelemetry.javaagent.instrumentation.ratpack.v1_4.RatpackSingletons.updateSpanNames;
 
 import io.opentelemetry.context.Scope;
-import io.opentelemetry.instrumentation.netty.v4_1.internal.ServerContext;
-import io.opentelemetry.instrumentation.netty.v4_1.internal.ServerContexts;
+import io.opentelemetry.instrumentation.netty.v4_1.internal.common.ServerContext;
+import io.opentelemetry.instrumentation.netty.v4_1.internal.common.ServerContexts;
 import io.opentelemetry.javaagent.bootstrap.Java8BytecodeBridge;
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
