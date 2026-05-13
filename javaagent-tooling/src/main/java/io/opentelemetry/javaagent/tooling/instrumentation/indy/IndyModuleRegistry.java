@@ -131,9 +131,9 @@ public class IndyModuleRegistry {
     String groupName = getModuleGroup(module);
 
     InstrumentationModuleClassLoader commonCl =
-            instrumentationCommonClassLoader.computeIfAbsent(
-                classLoader,
-                () -> new InstrumentationModuleClassLoader(classLoader, agentOrExtensionCl, null));
+        instrumentationCommonClassLoader.computeIfAbsent(
+            classLoader,
+            () -> new InstrumentationModuleClassLoader(classLoader, agentOrExtensionCl, null));
 
     InstrumentationModuleClassLoader moduleCl =
         instrumentationClassLoaders

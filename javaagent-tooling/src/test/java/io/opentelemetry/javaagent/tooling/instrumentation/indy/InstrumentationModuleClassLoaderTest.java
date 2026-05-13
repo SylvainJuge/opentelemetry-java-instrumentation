@@ -147,12 +147,19 @@ class InstrumentationModuleClassLoaderTest {
       Map<String, BytecodeWithUrl> toInject = new HashMap<>();
       // a copy of C is injected into module CL, thus the module CL should load it
       toInject.put(C.class.getName(), BytecodeWithUrl.create(C.class.getName(), moduleSourceCl));
-      // a copy of E is injected into common module CL, thus the module CL should delegate loading to the common CL.
+      // a copy of E is injected into common module CL, thus the module CL should delegate loading
+      // to the common CL.
       toInject.put(E.class.getName(), BytecodeWithUrl.create(E.class.getName(), moduleSourceCl));
 
-      InstrumentationModuleClassLoader moduleCommonCl = new InstrumentationModuleClassLoader(appCl, agentCl, any(), null, null);
+      InstrumentationModuleClassLoader moduleCommonCl =
+          new InstrumentationModuleClassLoader(appCl, agentCl, any(), null, null);
       InstrumentationModuleClassLoader moduleCl =
-          new InstrumentationModuleClassLoader(appCl, agentCl, any(), moduleCommonCl, new StringMatcher("E", StringMatcher.Mode.ENDS_WITH));
+          new InstrumentationModuleClassLoader(
+              appCl,
+              agentCl,
+              any(),
+              moduleCommonCl,
+              new StringMatcher("E", StringMatcher.Mode.ENDS_WITH));
       moduleCl.installInjectedClasses(toInject);
 
       // Verify precedence for classloading
@@ -175,8 +182,7 @@ class InstrumentationModuleClassLoaderTest {
       Class<?> clE = moduleCl.loadClass(E.class.getName());
       // marker remains the same as in the module CL.
       assertThat(getMarkerValue(clE)).isEqualTo("module-cl");
-      assertThat(clE.getClassLoader())
-          .isSameAs(moduleCommonCl);
+      assertThat(clE.getClassLoader()).isSameAs(moduleCommonCl);
 
       // Verify precedence for looking up .class resources
       URL resourceA = moduleCl.getResource(getClassFile(A.class));

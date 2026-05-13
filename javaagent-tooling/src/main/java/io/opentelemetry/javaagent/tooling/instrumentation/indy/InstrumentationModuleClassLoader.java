@@ -98,7 +98,9 @@ public class InstrumentationModuleClassLoader extends ClassLoader {
   private final Set<InstrumentationModule> installedModules;
 
   public InstrumentationModuleClassLoader(
-      ClassLoader instrumentedCl, ClassLoader agentOrExtensionCl, @Nullable InstrumentationModuleClassLoader commonCl) {
+      ClassLoader instrumentedCl,
+      ClassLoader agentOrExtensionCl,
+      @Nullable InstrumentationModuleClassLoader commonCl) {
     this(
         instrumentedCl,
         agentOrExtensionCl,
@@ -201,17 +203,17 @@ public class InstrumentationModuleClassLoader extends ClassLoader {
 
   // Visible for testing
   synchronized void installInjectedClasses(Map<String, BytecodeWithUrl> classesToInject) {
-    if(commonCl == null){
+    if (commonCl == null) {
       classesToInject.forEach(additionalInjectedClasses::putIfAbsent);
     } else {
-      classesToInject.forEach((className, bytecode) -> {
-        if(agentCommonClassNamesMatcher.matches(className)){
-          commonCl.additionalInjectedClasses.putIfAbsent(className, bytecode);
-        } else {
-          additionalInjectedClasses.putIfAbsent(className, bytecode);
-        }
-      });
-
+      classesToInject.forEach(
+          (className, bytecode) -> {
+            if (agentCommonClassNamesMatcher.matches(className)) {
+              commonCl.additionalInjectedClasses.putIfAbsent(className, bytecode);
+            } else {
+              additionalInjectedClasses.putIfAbsent(className, bytecode);
+            }
+          });
     }
   }
 
@@ -263,7 +265,7 @@ public class InstrumentationModuleClassLoader extends ClassLoader {
       Class<?> result = findLoadedClass(name);
 
       // Common classes delegation is first to ensure they are only loaded in the common CL
-      if(result == null && commonCl != null && agentCommonClassNamesMatcher.matches(name)){
+      if (result == null && commonCl != null && agentCommonClassNamesMatcher.matches(name)) {
         result = tryLoad(commonCl, name);
       }
 
