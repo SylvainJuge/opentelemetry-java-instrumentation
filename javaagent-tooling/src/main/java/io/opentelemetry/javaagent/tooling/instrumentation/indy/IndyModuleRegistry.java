@@ -131,10 +131,7 @@ public class IndyModuleRegistry {
     String groupName = getModuleGroup(module);
 
     InstrumentationModuleClassLoader commonCl =
-        // gentle opt-in only when getModuleGroup is not defined
-        groupName.equals(module.getClass().getName())
-            ? null
-            : instrumentationCommonClassLoader.computeIfAbsent(
+            instrumentationCommonClassLoader.computeIfAbsent(
                 classLoader,
                 () -> new InstrumentationModuleClassLoader(classLoader, agentOrExtensionCl, null));
 

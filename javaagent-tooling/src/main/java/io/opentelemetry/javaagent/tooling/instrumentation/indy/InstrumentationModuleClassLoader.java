@@ -74,7 +74,7 @@ public class InstrumentationModuleClassLoader extends ClassLoader {
 
   private final Map<String, BytecodeWithUrl> additionalInjectedClasses;
   private final ClassLoader agentOrExtensionCl;
-  @Nullable private final ClassLoader commonCl;
+  @Nullable private final InstrumentationModuleClassLoader commonCl;
   private volatile MethodHandles.Lookup cachedLookup;
 
   @Nullable private final ClassLoader instrumentedCl;
@@ -98,14 +98,14 @@ public class InstrumentationModuleClassLoader extends ClassLoader {
   private final Set<InstrumentationModule> installedModules;
 
   public InstrumentationModuleClassLoader(
-      ClassLoader instrumentedCl, ClassLoader agentOrExtensionCl, @Nullable ClassLoader commonCl) {
+      ClassLoader instrumentedCl, ClassLoader agentOrExtensionCl, @Nullable InstrumentationModuleClassLoader commonCl) {
     this(
         instrumentedCl,
         agentOrExtensionCl,
         new StringMatcher("io.opentelemetry.javaagent", StringMatcher.Mode.STARTS_WITH),
         commonCl,
         new StringMatcher(
-                "io.opentelemetry.javaagent.instrumentation.", StringMatcher.Mode.CONTAINS)
+                "io.opentelemetry.javaagent.shaded.instrumentation", StringMatcher.Mode.STARTS_WITH)
             .and(new StringMatcher(".common.", StringMatcher.Mode.CONTAINS)));
   }
 
@@ -113,7 +113,7 @@ public class InstrumentationModuleClassLoader extends ClassLoader {
       @Nullable ClassLoader instrumentedCl,
       ClassLoader agentOrExtensionCl,
       ElementMatcher<String> classesToLoadFromAgentOrExtensionCl,
-      @Nullable ClassLoader commonCl,
+      @Nullable InstrumentationModuleClassLoader commonCl,
       ElementMatcher<String> classesToLoadFromCommonCl) {
     // agent/extension-class loader is "main"-parent, but class lookup is overridden
     super(agentOrExtensionCl);
@@ -201,7 +201,18 @@ public class InstrumentationModuleClassLoader extends ClassLoader {
 
   // Visible for testing
   synchronized void installInjectedClasses(Map<String, BytecodeWithUrl> classesToInject) {
-    classesToInject.forEach(additionalInjectedClasses::putIfAbsent);
+    if(commonCl == null){
+      classesToInject.forEach(additionalInjectedClasses::putIfAbsent);
+    } else {
+      classesToInject.forEach((className, bytecode) -> {
+        if(agentCommonClassNamesMatcher.matches(className)){
+          commonCl.additionalInjectedClasses.putIfAbsent(className, bytecode);
+        } else {
+          additionalInjectedClasses.putIfAbsent(className, bytecode);
+        }
+      });
+
+    }
   }
 
   private static Set<String> getClassesToInject(InstrumentationModule module) {
@@ -252,7 +263,7 @@ public class InstrumentationModuleClassLoader extends ClassLoader {
       Class<?> result = findLoadedClass(name);
 
       // Common classes delegation is first to ensure they are only loaded in the common CL
-      if (commonCl != null && agentCommonClassNamesMatcher.matches(name)) {
+      if(result == null && commonCl != null && agentCommonClassNamesMatcher.matches(name)){
         result = tryLoad(commonCl, name);
       }
 

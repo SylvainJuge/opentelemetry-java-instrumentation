@@ -36,6 +36,7 @@ import java.util.jar.JarOutputStream;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.implementation.FixedValue;
+import net.bytebuddy.matcher.StringMatcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
@@ -127,7 +128,7 @@ class InstrumentationModuleClassLoaderTest {
     Map<String, byte[]> appClasses = copyClassesWithMarker("app-cl", A.class, B.class, C.class);
     Map<String, byte[]> agentClasses = copyClassesWithMarker("agent-cl", B.class, C.class);
     Map<String, byte[]> moduleClasses =
-        copyClassesWithMarker("module-cl", A.class, B.class, C.class, D.class);
+        copyClassesWithMarker("module-cl", A.class, B.class, C.class, D.class, E.class);
 
     Path appJar = tempDir.resolve("dummy-app.jar");
     createJar(appClasses, appJar);
@@ -144,10 +145,14 @@ class InstrumentationModuleClassLoaderTest {
 
     try {
       Map<String, BytecodeWithUrl> toInject = new HashMap<>();
+      // a copy of C is injected into module CL, thus the module CL should load it
       toInject.put(C.class.getName(), BytecodeWithUrl.create(C.class.getName(), moduleSourceCl));
+      // a copy of E is injected into common module CL, thus the module CL should delegate loading to the common CL.
+      toInject.put(E.class.getName(), BytecodeWithUrl.create(E.class.getName(), moduleSourceCl));
 
+      InstrumentationModuleClassLoader moduleCommonCl = new InstrumentationModuleClassLoader(appCl, agentCl, any(), null, null);
       InstrumentationModuleClassLoader moduleCl =
-          new InstrumentationModuleClassLoader(appCl, agentCl, any(), null, any());
+          new InstrumentationModuleClassLoader(appCl, agentCl, any(), moduleCommonCl, new StringMatcher("E", StringMatcher.Mode.ENDS_WITH));
       moduleCl.installInjectedClasses(toInject);
 
       // Verify precedence for classloading
@@ -166,6 +171,12 @@ class InstrumentationModuleClassLoaderTest {
 
       assertThatThrownBy(() -> moduleCl.loadClass(D.class.getName()))
           .isInstanceOf(ClassNotFoundException.class);
+
+      Class<?> clE = moduleCl.loadClass(E.class.getName());
+      // marker remains the same as in the module CL.
+      assertThat(getMarkerValue(clE)).isEqualTo("module-cl");
+      assertThat(clE.getClassLoader())
+          .isSameAs(moduleCommonCl);
 
       // Verify precedence for looking up .class resources
       URL resourceA = moduleCl.getResource(getClassFile(A.class));
@@ -315,4 +326,6 @@ class InstrumentationModuleClassLoaderTest {
   public static class C {}
 
   public static class D {}
+
+  public static class E {}
 }
