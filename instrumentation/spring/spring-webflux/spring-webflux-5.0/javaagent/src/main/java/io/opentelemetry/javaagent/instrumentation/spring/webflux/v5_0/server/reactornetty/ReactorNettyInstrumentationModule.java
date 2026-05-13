@@ -14,17 +14,10 @@ import io.opentelemetry.javaagent.extension.instrumentation.internal.Experimenta
 import java.util.List;
 
 @AutoService(InstrumentationModule.class)
-public class ReactorNettyInstrumentationModule extends InstrumentationModule
-    implements ExperimentalInstrumentationModule {
+public class ReactorNettyInstrumentationModule extends InstrumentationModule {
 
   public ReactorNettyInstrumentationModule() {
     super("spring-webflux", "spring-webflux-5.0", "reactor-netty", "reactor-netty-server");
-  }
-
-  @Override
-  public String getModuleGroup() {
-    // relies on netty
-    return "netty";
   }
 
   @Override
