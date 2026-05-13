@@ -14,8 +14,8 @@ import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.instrumentation.api.instrumenter.Instrumenter;
 import io.opentelemetry.instrumentation.netty.common.v4_0.internal.NettyCommonRequest;
-import io.opentelemetry.instrumentation.netty.v4_1.internal.AttributeKeys;
 import io.opentelemetry.instrumentation.netty.v4_1.internal.client.NettyClientHandlerFactory;
+import io.opentelemetry.instrumentation.netty.v4_1.internal.common.AttributeKeys;
 
 /** Entrypoint for instrumenting Netty HTTP clients. */
 public final class NettyClientTelemetry {

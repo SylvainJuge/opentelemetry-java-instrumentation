@@ -6,8 +6,8 @@
 package io.opentelemetry.javaagent.instrumentation.netty.v4_1;
 
 import static io.opentelemetry.javaagent.instrumentation.netty.common.v4_0.VirtualFieldHelper.CHANNEL_HANDLER;
-import static io.opentelemetry.javaagent.instrumentation.netty.v4_1.NettyClientSingletons.clientHandlerFactory;
-import static io.opentelemetry.javaagent.instrumentation.netty.v4_1.NettyClientSingletons.sslInstrumenter;
+import static io.opentelemetry.javaagent.instrumentation.netty.v4_1.common.NettyClientSingletons.clientHandlerFactory;
+import static io.opentelemetry.javaagent.instrumentation.netty.v4_1.common.NettyClientSingletons.sslInstrumenter;
 import static net.bytebuddy.matcher.ElementMatchers.nameStartsWith;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;

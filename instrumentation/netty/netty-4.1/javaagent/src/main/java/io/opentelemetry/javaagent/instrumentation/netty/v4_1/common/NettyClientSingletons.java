@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package io.opentelemetry.javaagent.instrumentation.netty.v4_1;
+package io.opentelemetry.javaagent.instrumentation.netty.v4_1.common;
 
 import static io.opentelemetry.instrumentation.netty.common.v4_0.internal.client.NettyConnectionInstrumentationFlag.enabledOrErrorOnly;
 
@@ -20,6 +20,7 @@ import io.opentelemetry.instrumentation.netty.common.v4_0.internal.client.NettyS
 import io.opentelemetry.instrumentation.netty.v4_1.internal.client.NettyClientHandlerFactory;
 import io.opentelemetry.javaagent.bootstrap.internal.AgentCommonConfig;
 
+// class in 'common' package to load in shared CL to be reused across instrumentation modules
 public class NettyClientSingletons {
 
   private static final boolean connectionTelemetryEnabled =

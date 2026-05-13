@@ -6,7 +6,7 @@
 package io.opentelemetry.javaagent.instrumentation.netty.v4_1;
 
 import static io.opentelemetry.instrumentation.netty.v4_1.internal.client.HttpClientRequestTracingHandler.HTTP_CLIENT_REQUEST;
-import static io.opentelemetry.javaagent.instrumentation.netty.v4_1.NettyClientSingletons.instrumenter;
+import static io.opentelemetry.javaagent.instrumentation.netty.v4_1.common.NettyClientSingletons.instrumenter;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 
@@ -15,9 +15,9 @@ import io.netty.util.Attribute;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.instrumentation.netty.common.internal.NettyErrorHolder;
 import io.opentelemetry.instrumentation.netty.common.v4_0.internal.NettyCommonRequest;
-import io.opentelemetry.instrumentation.netty.v4_1.internal.AttributeKeys;
-import io.opentelemetry.instrumentation.netty.v4_1.internal.ServerContext;
-import io.opentelemetry.instrumentation.netty.v4_1.internal.ServerContexts;
+import io.opentelemetry.instrumentation.netty.v4_1.internal.common.AttributeKeys;
+import io.opentelemetry.instrumentation.netty.v4_1.internal.common.ServerContext;
+import io.opentelemetry.instrumentation.netty.v4_1.internal.common.ServerContexts;
 import io.opentelemetry.javaagent.extension.instrumentation.TypeInstrumentation;
 import io.opentelemetry.javaagent.extension.instrumentation.TypeTransformer;
 import net.bytebuddy.asm.Advice;
