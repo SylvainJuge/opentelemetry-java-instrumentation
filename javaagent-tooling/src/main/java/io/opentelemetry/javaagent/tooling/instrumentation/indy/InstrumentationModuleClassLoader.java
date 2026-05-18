@@ -107,8 +107,7 @@ public class InstrumentationModuleClassLoader extends ClassLoader {
         agentOrExtensionCl,
         new StringMatcher("io.opentelemetry.javaagent", StringMatcher.Mode.STARTS_WITH),
         commonCl,
-        new StringMatcher(
-                "io.opentelemetry.javaagent.", StringMatcher.Mode.STARTS_WITH)
+        new StringMatcher("io.opentelemetry.javaagent.", StringMatcher.Mode.STARTS_WITH)
             .and(new StringMatcher(".instrumentation.", StringMatcher.Mode.CONTAINS))
             .and(new StringMatcher(".common.", StringMatcher.Mode.CONTAINS)));
   }
@@ -177,13 +176,12 @@ public class InstrumentationModuleClassLoader extends ClassLoader {
                     className -> className,
                     className -> BytecodeWithUrl.create(className, agentOrExtensionCl)));
 
-    if(commonCl == null){
+    if (commonCl == null) {
       installInjectedClasses(classesToInject);
     } else {
-      Map<String,BytecodeWithUrl> common = new HashMap<>();
-      Map<String,BytecodeWithUrl> injected = new  HashMap<>();
-      classesToInject
-          .forEach(
+      Map<String, BytecodeWithUrl> common = new HashMap<>();
+      Map<String, BytecodeWithUrl> injected = new HashMap<>();
+      classesToInject.forEach(
           (className, bytecode) -> {
             if (useCommonClassLoader(className)) {
               common.putIfAbsent(className, bytecode);
