@@ -176,6 +176,25 @@ public class InstrumentationModuleClassLoader extends ClassLoader {
                 toMap(
                     className -> className,
                     className -> BytecodeWithUrl.create(className, agentOrExtensionCl)));
+
+    if(commonCl == null){
+      installInjectedClasses(classesToInject);
+    } else {
+      Map<String,BytecodeWithUrl> common = new HashMap<>();
+      Map<String,BytecodeWithUrl> injected = new  HashMap<>();
+      classesToInject
+          .forEach(
+          (className, bytecode) -> {
+            if (useCommonClassLoader(className)) {
+              common.putIfAbsent(className, bytecode);
+            } else {
+              injected.putIfAbsent(className, bytecode);
+            }
+          });
+      commonCl.installInjectedClasses(common);
+      installInjectedClasses(injected);
+    }
+
     installInjectedClasses(classesToInject);
     if (module instanceof ExperimentalInstrumentationModule) {
       ExperimentalInstrumentationModule experimentalModule =
@@ -199,28 +218,24 @@ public class InstrumentationModuleClassLoader extends ClassLoader {
     }
   }
 
+  /**
+   * Determines if injected class should be loaded in a shared class loader or not.
+   *
+   * @param className class name
+   * @return true if class should be loaded in shared class loader, false otherwise (default)
+   */
+  boolean useCommonClassLoader(String className) {
+    // TODO: we can replace this name-based heuristic with proper annotation
+    return agentCommonClassNamesMatcher.matches(className);
+  }
+
   public synchronized boolean hasModuleInstalled(InstrumentationModule module) {
     return installedModules.contains(module);
   }
 
   // Visible for testing
   synchronized void installInjectedClasses(Map<String, BytecodeWithUrl> classesToInject) {
-    if (commonCl == null) {
-      classesToInject.forEach(additionalInjectedClasses::putIfAbsent);
-    } else {
-      Map<String,BytecodeWithUrl> common = new HashMap<>();
-      Map<String,BytecodeWithUrl> injected = new  HashMap<>();
-      classesToInject.forEach(
-          (className, bytecode) -> {
-            if (agentCommonClassNamesMatcher.matches(className)) {
-              common.putIfAbsent(className, bytecode);
-            } else {
-              injected.putIfAbsent(className, bytecode);
-            }
-          });
-        commonCl.installInjectedClasses(common);
-        injected.forEach(additionalInjectedClasses::putIfAbsent);
-    }
+    classesToInject.forEach(additionalInjectedClasses::putIfAbsent);
   }
 
   private static Set<String> getClassesToInject(InstrumentationModule module) {
