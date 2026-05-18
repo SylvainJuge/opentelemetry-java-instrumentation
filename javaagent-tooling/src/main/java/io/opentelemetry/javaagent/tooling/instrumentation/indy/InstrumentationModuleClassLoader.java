@@ -27,6 +27,7 @@ import java.security.PrivilegedAction;
 import java.security.ProtectionDomain;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -107,7 +108,8 @@ public class InstrumentationModuleClassLoader extends ClassLoader {
         new StringMatcher("io.opentelemetry.javaagent", StringMatcher.Mode.STARTS_WITH),
         commonCl,
         new StringMatcher(
-                "io.opentelemetry.javaagent.shaded.instrumentation", StringMatcher.Mode.STARTS_WITH)
+                "io.opentelemetry.javaagent.", StringMatcher.Mode.STARTS_WITH)
+            .and(new StringMatcher(".instrumentation.", StringMatcher.Mode.CONTAINS))
             .and(new StringMatcher(".common.", StringMatcher.Mode.CONTAINS)));
   }
 
@@ -206,14 +208,18 @@ public class InstrumentationModuleClassLoader extends ClassLoader {
     if (commonCl == null) {
       classesToInject.forEach(additionalInjectedClasses::putIfAbsent);
     } else {
+      Map<String,BytecodeWithUrl> common = new HashMap<>();
+      Map<String,BytecodeWithUrl> injected = new  HashMap<>();
       classesToInject.forEach(
           (className, bytecode) -> {
             if (agentCommonClassNamesMatcher.matches(className)) {
-              commonCl.additionalInjectedClasses.putIfAbsent(className, bytecode);
+              common.putIfAbsent(className, bytecode);
             } else {
-              additionalInjectedClasses.putIfAbsent(className, bytecode);
+              injected.putIfAbsent(className, bytecode);
             }
           });
+        commonCl.installInjectedClasses(common);
+        injected.forEach(additionalInjectedClasses::putIfAbsent);
     }
   }
 
