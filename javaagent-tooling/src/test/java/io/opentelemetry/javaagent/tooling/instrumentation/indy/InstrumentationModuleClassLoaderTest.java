@@ -160,6 +160,8 @@ class InstrumentationModuleClassLoaderTest {
               any(),
               moduleCommonCl,
               new StringMatcher("E", StringMatcher.Mode.ENDS_WITH));
+
+      // this will delegate injection into common CL as-needed
       moduleCl.installInjectedClasses(toInject);
 
       // Verify precedence for classloading
