@@ -10,8 +10,8 @@ import static net.bytebuddy.matcher.ElementMatchers.takesNoArguments;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.opentelemetry.context.Scope;
-import io.opentelemetry.instrumentation.netty.v4_1.internal.common.ServerContext;
-import io.opentelemetry.instrumentation.netty.v4_1.internal.common.ServerContexts;
+import io.opentelemetry.instrumentation.netty.v4_1.internal.ServerContext;
+import io.opentelemetry.instrumentation.netty.v4_1.internal.ServerContexts;
 import io.opentelemetry.javaagent.extension.instrumentation.TypeInstrumentation;
 import io.opentelemetry.javaagent.extension.instrumentation.TypeTransformer;
 import javax.annotation.Nullable;

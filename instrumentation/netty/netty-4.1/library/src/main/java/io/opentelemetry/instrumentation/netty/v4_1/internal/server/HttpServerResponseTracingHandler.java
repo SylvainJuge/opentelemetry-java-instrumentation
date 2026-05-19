@@ -21,8 +21,8 @@ import io.opentelemetry.instrumentation.netty.common.internal.NettyErrorHolder;
 import io.opentelemetry.instrumentation.netty.common.v4_0.internal.NettyCommonRequest;
 import io.opentelemetry.instrumentation.netty.v4_1.internal.ProtocolEventHandler;
 import io.opentelemetry.instrumentation.netty.v4_1.internal.ProtocolSpecificEvent;
-import io.opentelemetry.instrumentation.netty.v4_1.internal.common.ServerContext;
-import io.opentelemetry.instrumentation.netty.v4_1.internal.common.ServerContexts;
+import io.opentelemetry.instrumentation.netty.v4_1.internal.ServerContext;
+import io.opentelemetry.instrumentation.netty.v4_1.internal.ServerContexts;
 import javax.annotation.Nullable;
 
 /**

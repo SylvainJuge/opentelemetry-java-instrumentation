@@ -21,6 +21,12 @@ public class RatpackInstrumentationModule extends InstrumentationModule
   }
 
   @Override
+  public String getModuleGroup() {
+    // relies on netty
+    return "netty";
+  }
+
+  @Override
   public List<TypeInstrumentation> typeInstrumentations() {
     return asList(
         new ContinuationInstrumentation(),

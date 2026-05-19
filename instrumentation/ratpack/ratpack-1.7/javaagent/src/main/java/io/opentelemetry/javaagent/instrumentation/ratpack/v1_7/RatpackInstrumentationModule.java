@@ -23,6 +23,12 @@ public class RatpackInstrumentationModule extends InstrumentationModule
   }
 
   @Override
+  public String getModuleGroup() {
+    // relies on netty
+    return "netty";
+  }
+
+  @Override
   public ElementMatcher.Junction<ClassLoader> classLoaderMatcher() {
     // added in 1.7.0
     return hasClassesNamed("ratpack.exec.util.retry.Delay");

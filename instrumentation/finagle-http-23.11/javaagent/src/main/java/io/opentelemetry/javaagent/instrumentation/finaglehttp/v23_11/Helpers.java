@@ -6,7 +6,7 @@
 package io.opentelemetry.javaagent.instrumentation.finaglehttp.v23_11;
 
 import static io.opentelemetry.instrumentation.netty.v4_1.internal.client.HttpClientRequestTracingHandler.HTTP_CLIENT_REQUEST;
-import static io.opentelemetry.javaagent.instrumentation.netty.v4_1.common.NettyClientSingletons.clientHandlerFactory;
+import static io.opentelemetry.javaagent.instrumentation.netty.v4_1.NettyClientSingletons.clientHandlerFactory;
 
 import com.twitter.finagle.ChannelTransportHelpers;
 import com.twitter.finagle.Netty4HttpPackageHelpers;
@@ -26,9 +26,9 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http2.Http2StreamFrameToHttpObjectCodec;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.instrumentation.api.util.VirtualField;
+import io.opentelemetry.instrumentation.netty.v4_1.internal.AttributeKeys;
+import io.opentelemetry.instrumentation.netty.v4_1.internal.ServerContexts;
 import io.opentelemetry.instrumentation.netty.v4_1.internal.client.HttpClientTracingHandler;
-import io.opentelemetry.instrumentation.netty.v4_1.internal.common.AttributeKeys;
-import io.opentelemetry.instrumentation.netty.v4_1.internal.common.ServerContexts;
 import io.opentelemetry.instrumentation.netty.v4_1.internal.server.HttpServerTracingHandler;
 import io.opentelemetry.javaagent.instrumentation.netty.common.v4_0.VirtualFieldHelper;
 import io.opentelemetry.javaagent.instrumentation.netty.v4_1.NettyServerSingletons;

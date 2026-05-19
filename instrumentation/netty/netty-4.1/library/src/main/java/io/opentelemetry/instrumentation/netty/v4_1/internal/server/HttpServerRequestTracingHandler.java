@@ -14,8 +14,8 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.instrumentation.api.instrumenter.Instrumenter;
 import io.opentelemetry.instrumentation.netty.common.v4_0.internal.NettyCommonRequest;
-import io.opentelemetry.instrumentation.netty.v4_1.internal.common.ServerContext;
-import io.opentelemetry.instrumentation.netty.v4_1.internal.common.ServerContexts;
+import io.opentelemetry.instrumentation.netty.v4_1.internal.ServerContext;
+import io.opentelemetry.instrumentation.netty.v4_1.internal.ServerContexts;
 
 /**
  * This class is internal and is hence not for public use. Its APIs are unstable and can change at
