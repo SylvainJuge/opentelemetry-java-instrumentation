@@ -8,6 +8,7 @@ package io.opentelemetry.instrumentation.jmx.rules;
 import static io.opentelemetry.instrumentation.jmx.rules.assertions.DataPointAttributes.attribute;
 import static io.opentelemetry.instrumentation.jmx.rules.assertions.DataPointAttributes.attributeGroup;
 import static io.opentelemetry.instrumentation.jmx.rules.assertions.DataPointAttributes.attributeWithAnyValue;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -16,7 +17,9 @@ import io.opentelemetry.instrumentation.jmx.rules.assertions.AttributeMatcherGro
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -24,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.images.builder.Transferable;
 
 class CassandraTest extends TargetSystemTest {
 
@@ -133,23 +137,20 @@ class CassandraTest extends TargetSystemTest {
 
   private static void seedCompactionBatch(GenericContainer<?> target)
       throws IOException, InterruptedException {
+    char[] data = new char[COMPACTION_VALUE_BYTES];
+    Arrays.fill(data, 'x');
+    StringBuilder csv = new StringBuilder();
+    for (int i = 0; i < COMPACTION_ROWS_PER_BATCH; i++) {
+      csv.append(UUID.randomUUID()).append(',').append(data).append('\n');
+    }
+    target.copyFileToContainer(
+        Transferable.of(csv.toString().getBytes(UTF_8)), "/tmp/cassandra-data.csv");
     execOrThrow(
         target,
-        "bash",
-        "-c",
-        // value is generated once and reused for all rows - only byte volume matters here.
-        "set -euo pipefail; "
-            + "value=$(head -c "
-            + COMPACTION_VALUE_BYTES
-            + " /dev/zero | tr '\\0' x); "
-            + "rm -f /tmp/cassandra-data.csv; "
-            + "for i in $(seq 1 "
-            + COMPACTION_ROWS_PER_BATCH
-            + "); do "
-            + "printf \"%s,%s\\n\" \"$(cat /proc/sys/kernel/random/uuid)\" \"$value\"; "
-            + "done > /tmp/cassandra-data.csv; "
-            + "cqlsh -e \"COPY test.data (id, val) FROM '/tmp/cassandra-data.csv' "
-            + "WITH HEADER = false AND MINBATCHSIZE = 1 AND MAXBATCHSIZE = 2;\"");
+        "cqlsh",
+        "-e",
+        "COPY test.data (id, val) FROM '/tmp/cassandra-data.csv'"
+            + " WITH HEADER = false AND MINBATCHSIZE = 1 AND MAXBATCHSIZE = 2;");
   }
 
   private static void triggerCompaction(GenericContainer<?> target, AtomicBoolean keepCompacting) {
